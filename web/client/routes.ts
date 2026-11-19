@@ -25,4 +25,15 @@ export const routes = route(base, {
     readonly: get("/readonly"),
     local: get("/local"),
   }),
+  myna: route("myna", {
+    index: get("/"),
+    inside: get("/inside"),
+    tamper: get("/tamper"),
+    phone: get("/phone"),
+    auth: get("/auth"),
+    anonymous: get("/anonymous"),
+    digitalAuthApp: get("/digital-auth-app"),
+    signature: get("/signature"),
+    license: get("/license"),
+  }),
 });

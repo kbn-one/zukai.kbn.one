@@ -29,6 +29,15 @@ Deno.test("GET /ai shows the overview and links every chapter", async () => {
   }
 });
 
+Deno.test("GET /myna shows the card and links every chapter", async () => {
+  const html = await get("/myna");
+  assertStringIncludes(html, "<ruby>");
+  const myna = series.find((s) => s.key === "myna")!;
+  for (const c of myna.chapters) {
+    assertStringIncludes(html, `href="${c.route.href()}"`);
+  }
+});
+
 for (const s of series) {
   for (const c of s.chapters) {
     Deno.test(`GET ${c.route.href()} hydrates its picture and marks itself in the もくじ`, async () => {

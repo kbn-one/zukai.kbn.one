@@ -4,13 +4,23 @@
  * A chapter reads the same way each time — its question, a "たとえるなら" box, the moving picture,
  * "ひとことで", the details worth knowing, sources, then まえ / つぎ — and these are those pieces.
  * They render on the server only; the moving pictures are the islands under `islands/`.
+ *
+ * A 図解 written for children sets `ruby` on its series, and the strings printed here from the
+ * series list get readings above their kanji. The pieces that print a string prop of their own
+ * (`Stage`, `Cast`, `Sources`) take a `ruby` flag for the same reason.
  */
 
 import { css, type Handle, type RemixNode } from "@remix-run/component";
 
+import { readings } from "./ruby/readings.ts";
 import { placeOf, type Series } from "./series.ts";
 import { art, color, font, radius } from "./tokens.ts";
 import { Icon, type IconName } from "./ui/icons.tsx";
+
+/** The text as it is, or with readings above its kanji when `ruby` is set. */
+function say(ruby: boolean | undefined, text: string): RemixNode {
+  return ruby ? readings(text) : text;
+}
 
 /** The chapter's number, its question and the lead line under it. */
 export function ChapterHead(
@@ -22,9 +32,9 @@ export function ChapterHead(
       <header mix={chapterHeadStyle}>
         <p mix={eyebrowStyle}>
           <span mix={badgeStyle} aria-hidden="true">{number}</span>
-          {series.title}第{number}章
+          {say(series.ruby, `${series.title}第${number}章`)}
         </p>
-        <h1>{chapter.title}</h1>
+        <h1>{say(series.ruby, chapter.title)}</h1>
         {handle.props.children
           ? <div mix={leadStyle}>{handle.props.children}</div>
           : null}
@@ -71,14 +81,30 @@ export function DetailNote(handle: Handle<{ children: RemixNode }>) {
   );
 }
 
+/**
+ * "大人向けメモ": the real names and numbers, for whoever is reading along with a child — the
+ * {@link DetailNote} of a 図解 written for children.
+ */
+export function GrownUpNote(handle: Handle<{ children: RemixNode }>) {
+  return () => (
+    <details mix={noteStyle}>
+      <summary>
+        {readings("大人向けメモ（本当の名前と、くわしいこと）")}
+      </summary>
+      <div mix={noteBodyStyle}>{handle.props.children}</div>
+    </details>
+  );
+}
+
 /** A frame around an island, so the moving picture reads as the thing to play with. */
 export function Stage(
-  handle: Handle<{ label: string; children: RemixNode }>,
+  handle: Handle<{ label: string; ruby?: boolean; children: RemixNode }>,
 ) {
   return () => (
     <section mix={stageStyle} aria-label={handle.props.label}>
       <p mix={stageLabelStyle}>
-        <Icon name="play" size="1.1rem" /> {handle.props.label}
+        <Icon name="play" size="1.1rem" />{" "}
+        {say(handle.props.ruby, handle.props.label)}
       </p>
       {handle.props.children}
     </section>
@@ -94,7 +120,9 @@ export interface CastMember {
 }
 
 /** "登場するもの": the cast of a chapter's picture, as a row of small tiles. */
-export function Cast(handle: Handle<{ items: CastMember[] }>) {
+export function Cast(
+  handle: Handle<{ items: CastMember[]; ruby?: boolean }>,
+) {
   return () => (
     <ul mix={castStyle}>
       {handle.props.items.map((m) => (
@@ -102,8 +130,8 @@ export function Cast(handle: Handle<{ items: CastMember[] }>) {
           <span mix={castIconStyle}>
             <Icon name={m.icon} size="1.6rem" />
           </span>
-          <strong>{m.name}</strong>
-          <span>{m.note}</span>
+          <strong>{say(handle.props.ruby, m.name)}</strong>
+          <span>{say(handle.props.ruby, m.note)}</span>
         </li>
       ))}
     </ul>
@@ -117,14 +145,16 @@ export interface Source {
 }
 
 /** Where the facts on the page come from. */
-export function Sources(handle: Handle<{ items: Source[] }>) {
+export function Sources(
+  handle: Handle<{ items: Source[]; ruby?: boolean }>,
+) {
   return () => (
     <section mix={sourcesStyle}>
       <h2>もっとくわしく</h2>
       <ul>
         {handle.props.items.map((s) => (
           <li key={s.href}>
-            <a href={s.href}>{s.label}</a>
+            <a href={s.href}>{say(handle.props.ruby, s.label)}</a>
           </li>
         ))}
       </ul>
@@ -142,26 +172,26 @@ export function ChapterNav(handle: Handle<{ chapter: { href(): string } }>) {
           ? (
             <a href={prev.route.href()} mix={[pagerStyle, prevStyle]}>
               <small>まえ</small>
-              <span>{prev.title}</span>
+              <span>{say(series.ruby, prev.title)}</span>
             </a>
           )
           : (
             <a href={series.index.href()} mix={[pagerStyle, prevStyle]}>
               <small>もどる</small>
-              <span>{series.title}のもくじ</span>
+              <span>{say(series.ruby, `${series.title}のもくじ`)}</span>
             </a>
           )}
         {next
           ? (
             <a href={next.route.href()} mix={[pagerStyle, nextStyle]}>
               <small>つぎ</small>
-              <span>{next.title}</span>
+              <span>{say(series.ruby, next.title)}</span>
             </a>
           )
           : (
             <a href={series.index.href()} mix={[pagerStyle, nextStyle]}>
               <small>おしまい</small>
-              <span>{series.title}のもくじへ</span>
+              <span>{say(series.ruby, `${series.title}のもくじへ`)}</span>
             </a>
           )}
       </nav>
@@ -173,20 +203,23 @@ export function ChapterNav(handle: Handle<{ chapter: { href(): string } }>) {
 export function ChapterList(handle: Handle<{ series: Series }>) {
   return () => (
     <ol mix={chapterListStyle}>
-      {handle.props.series.chapters.map((c, i) => (
-        <li key={c.route.href()}>
-          <a href={c.route.href()} mix={chapterCardStyle}>
-            <span mix={chapterCardIconStyle}>
-              <Icon name={c.icon} size="1.5rem" />
-            </span>
-            <span>
-              <small>第{i + 1}章</small>
-              <strong>{c.title}</strong>
-              <span>{c.lead}</span>
-            </span>
-          </a>
-        </li>
-      ))}
+      {handle.props.series.chapters.map((c, i) => {
+        const ruby = handle.props.series.ruby;
+        return (
+          <li key={c.route.href()}>
+            <a href={c.route.href()} mix={chapterCardStyle}>
+              <span mix={chapterCardIconStyle}>
+                <Icon name={c.icon} size="1.5rem" />
+              </span>
+              <span>
+                <small>{say(ruby, `第${i + 1}章`)}</small>
+                <strong>{say(ruby, c.title)}</strong>
+                <span>{say(ruby, c.lead)}</span>
+              </span>
+            </a>
+          </li>
+        );
+      })}
     </ol>
   );
 }
@@ -397,7 +430,7 @@ const chapterCardStyle = css({
     fontSize: "1.1rem",
     lineHeight: 1.5,
   },
-  "& span > span": {
+  "& > span > span": {
     display: "block",
     marginTop: "0.25rem",
     color: color.muted,

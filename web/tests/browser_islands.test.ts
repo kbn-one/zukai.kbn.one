@@ -1,3 +1,4 @@
+import { assertEquals } from "@std/assert";
 import puppeteer from "puppeteer-core";
 import { lightpanda } from "@lightpanda/browser";
 
@@ -78,21 +79,40 @@ async function withPage(
   }
 }
 
-/** A page-side expression: whether some element matching `selector` has text including every needle. */
+/**
+ * A page-side expression: whether `selector` has an element whose text, readings left out,
+ * includes every needle. Every kanji carries an `<rt>` reading, which `textContent` would run
+ * into the words — `本物` reads as `本物ほんもの` — so the readings are dropped first.
+ */
 function shows(needles: string[], selector = "body"): string {
   return `[...document.querySelectorAll(${
     JSON.stringify(selector)
-  })].some((el) => ${
-    JSON.stringify(needles)
-  }.every((n) => (el.textContent ?? "").includes(n)))`;
+  })].some((el) => {
+    const copy = el.cloneNode(true);
+    copy.querySelectorAll("rt").forEach((rt) => rt.remove());
+    const text = copy.textContent ?? "";
+    return ${JSON.stringify(needles)}.every((n) => text.includes(n));
+  })`;
 }
 
-/** Clicks the first button whose text includes `text`. */
-function clickButton(page: import("puppeteer-core").Page, text: string) {
+/**
+ * Clicks the first button whose text, readings left out, includes `text` — inside `scope` when
+ * a page has more than one moving picture.
+ */
+function clickButton(
+  page: import("puppeteer-core").Page,
+  text: string,
+  scope = "body",
+) {
   return page.$$eval(
-    "button",
+    `${scope} button`,
     (els, t) => {
-      const el = els.find((e) => (e.textContent ?? "").includes(t as string));
+      const plain = (e: Element) => {
+        const copy = e.cloneNode(true) as Element;
+        copy.querySelectorAll("rt").forEach((rt) => rt.remove());
+        return copy.textContent ?? "";
+      };
+      const el = els.find((e) => plain(e).includes(t as string));
       if (!el) throw new Error(`no button with ${t}`);
       (el as HTMLButtonElement).click();
     },
@@ -155,6 +175,205 @@ Deno.test({
         ]),
         { timeout: 5_000 },
       );
+    });
+  },
+});
+
+Deno.test({
+  name: "lightpanda: /myna/inside のチップを開くと部屋のとびらが出る",
+  sanitizeResources: false,
+  sanitizeOps: false,
+  async fn() {
+    await withPage(async (page, origin) => {
+      await page.goto(`${origin}/myna/inside`);
+      await page.waitForFunction("globalThis.__rmxReady === true", {
+        timeout: 10_000,
+      });
+      // メモ帳とチップの比べっこ: チップは中身の読み出しをことわる。
+      await clickButton(page, "中身をぜんぶ読ませて");
+      await page.waitForFunction(
+        shows(["お断り"]),
+        { timeout: 5_000 },
+      );
+      await clickButton(page, "チップの中を見る");
+      await page.waitForFunction(
+        shows(["あき部屋"], "button"),
+        { timeout: 5_000 },
+      );
+      await clickButton(page, "入っていないもの");
+      await page.waitForFunction(
+        shows(["チップに入っていないもの"]),
+        { timeout: 5_000 },
+      );
+    });
+  },
+});
+
+Deno.test({
+  name: "lightpanda: /myna/tamper で暗証番号を 3 回まちがえるとロックされる",
+  sanitizeResources: false,
+  sanitizeOps: false,
+  async fn() {
+    await withPage(async (page, origin) => {
+      await page.goto(`${origin}/myna/tamper`);
+      await page.waitForFunction("globalThis.__rmxReady === true", {
+        timeout: 10_000,
+      });
+      await clickButton(page, "暗証番号を当てずっぽう");
+      await page.waitForFunction(
+        shows(["まちがい：0 / 3"]),
+        { timeout: 5_000 },
+      );
+      for (let i = 0; i < 12; i++) {
+        await page.$$eval("button", (els) => {
+          const one = els.find((e) => e.textContent?.trim() === "1");
+          (one as HTMLButtonElement).click();
+        });
+      }
+      await page.waitForFunction(
+        shows(["ロック中"]),
+        { timeout: 5_000 },
+      );
+      const status = await page.$eval(
+        "[data-mood]",
+        (el) => el.getAttribute("data-mood"),
+      );
+      assertEquals(status, "locked");
+    });
+  },
+});
+
+Deno.test({
+  name:
+    "lightpanda: /myna/auth で、にせものは J-LIS で、使い回しは電子署名ではじかれる",
+  sanitizeResources: false,
+  sanitizeOps: false,
+  async fn() {
+    await withPage(async (page, origin) => {
+      await page.goto(`${origin}/myna/auth`);
+      await page.waitForFunction("globalThis.__rmxReady === true", {
+        timeout: 10_000,
+      });
+      for (let i = 0; i < 3; i++) await clickButton(page, "すすむ");
+      await page.waitForFunction(
+        shows(["電子署名は合う"]),
+        { timeout: 5_000 },
+      );
+      // にせものカードは電子署名のたしかめは通るが、J-LIS のたしかめで落ちる。
+      await clickButton(page, "にせものカード");
+      for (let i = 0; i < 4; i++) await clickButton(page, "すすむ");
+      await page.waitForFunction(
+        shows(["電子署名は合う", "そんな電子証明書は出していない"]),
+        { timeout: 5_000 },
+      );
+      // のぞき見した人が 1 回目の電子署名を盗み、2 回目に使い回しても合わない。
+      await clickButton(page, "のぞき見して使い回す");
+      for (let i = 0; i < 4; i++) await clickButton(page, "すすむ");
+      await page.waitForFunction(
+        shows(["これをそのまま返す", "確かめると…合わない"]),
+        { timeout: 5_000 },
+      );
+    });
+  },
+});
+
+Deno.test({
+  name: "lightpanda: /myna/phone で、スマホなら聞かれたことだけを見せる",
+  sanitizeResources: false,
+  sanitizeOps: false,
+  async fn() {
+    await withPage(async (page, origin) => {
+      await page.goto(`${origin}/myna/phone`);
+      await page.waitForFunction("globalThis.__rmxReady === true", {
+        timeout: 10_000,
+      });
+      // カードを見せると、聞いていないことまで見えてしまう。
+      await clickButton(page, "カードを見せる");
+      await page.waitForFunction(shows(["聞いていないことまで見えた"]), {
+        timeout: 5_000,
+      });
+      // スマホなら「20さい以上」の1行だけがとどき、J-LISのしるしで確かめられる。
+      await clickButton(page, "スマホで見せる");
+      const stage = 'section[aria-label*="見せたいこと"]';
+      for (let i = 0; i < 3; i++) await clickButton(page, "すすむ", stage);
+      await page.waitForFunction(
+        shows(["J-LISのしるしと合う：本物", "とどいていない"], stage),
+        { timeout: 5_000 },
+      );
+    });
+  },
+});
+
+Deno.test({
+  name:
+    "lightpanda: /myna/license で、これからのスマホ免許証は未定の例として出る",
+  sanitizeResources: false,
+  sanitizeOps: false,
+  async fn() {
+    await withPage(async (page, origin) => {
+      await page.goto(`${origin}/myna/license`);
+      await page.waitForFunction("globalThis.__rmxReady === true", {
+        timeout: 10_000,
+      });
+      await clickButton(page, "マイナ免許証");
+      await page.waitForFunction(shows(["免許の情報は入らない"]), {
+        timeout: 5_000,
+      });
+      await clickButton(page, "これから");
+      await page.waitForFunction(
+        shows([
+          "まだ決まっていないことの例",
+          "カードを持たなくても運転できるようにする方向",
+        ]),
+        { timeout: 5_000 },
+      );
+    });
+  },
+});
+
+Deno.test({
+  name: "lightpanda: /myna/signature は、カギを作るところから始まる",
+  sanitizeResources: false,
+  sanitizeOps: false,
+  async fn() {
+    // lightpanda can generate an ECDSA key but cannot export one (NotSupportedError), so the
+    // whole flow — keys, signature, check — is verified in a full browser instead. Here: the
+    // first render waits for the first button, and nothing else can be pressed yet.
+    await withPage(async (page, origin) => {
+      await page.goto(`${origin}/myna/signature`);
+      await page.waitForFunction("globalThis.__rmxReady === true", {
+        timeout: 10_000,
+      });
+      const enabled = await page.$$eval(
+        "section[aria-label*='電子署名'] button:not([disabled])",
+        (els) =>
+          els.map((e) => {
+            const c = e.cloneNode(true) as Element;
+            c.querySelectorAll("rt").forEach((r) => r.remove());
+            return (c.textContent ?? "").trim();
+          }),
+      );
+      assertEquals(enabled, ["カギのペアを作る"]);
+      const official = await page.$$eval(
+        "section[aria-label*='届け'] button:not([disabled])",
+        (els) =>
+          els.map((e) => {
+            const c = e.cloneNode(true) as Element;
+            c.querySelectorAll("rt").forEach((r) => r.remove());
+            return (c.textContent ?? "").trim();
+          }),
+      );
+      assertEquals(official, ["カードで電子署名を作る"]);
+      const certificate = await page.$$eval(
+        "section[aria-label*='電子証明書を出す'] button:not([disabled])",
+        (els) =>
+          els.map((e) => {
+            const c = e.cloneNode(true) as Element;
+            c.querySelectorAll("rt").forEach((r) => r.remove());
+            return (c.textContent ?? "").trim();
+          }),
+      );
+      assertEquals(certificate, ["あなたのカードを作る"]);
     });
   },
 });
