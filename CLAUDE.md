@@ -42,13 +42,29 @@
 - 図解AI
   の読み手は、ITにくわしくない大人。本文は「です・ます」、図の説明は短い話しことば。
   正確な名前・数字・注意点は「くわしいメモ」（`DetailNote`）に書く
-- 図解ごとに読み手がちがってよい（子ども向けにするならルビの仕組みは myna-how
-  を参照）
+- 図解ごとに読み手がちがってよい。子ども向けの図解（`myna` =
+  マイナンバーカードのひみつ）は下の「ルビ」にしたがう
 - 絵文字は使わない。アイコンは `ui/icons.tsx` の `Icon`
 - JSX のテキストを日本語の途中で改行しない（改行が空白になって表示される）
 - island の初期描画はサーバーとブラウザで同じにする（乱数・時刻は操作後に使う）
 - 誇張しない。「大丈夫」と言うときは、何が大丈夫で何が別の話かを `DetailNote`
   に書く
+
+## ルビ（子ども向けの図解）
+
+- `myna` のページ・island・`ui/myna_*.tsx` は、先頭に
+  `/** @jsxImportSource ruby-jsx */` と
+  `import type {} from "@remix-run/component/jsx-runtime";` を置く。JSX
+  の文字の漢字に自動でルビがつく（`web/client/ruby/`）。型チェックは Remix の
+  JSX 型を読むので、2行目の import が要る
+- 共有の `layout.tsx` / `parts.tsx` は普通の Remix で書かれている。`series.ts`
+  で `ruby: true` の図解では、そこが出す文字（章の題、もくじ）にもルビをつける。
+  `Stage` `Cast` `Sources` には `ruby` を渡す。本文は `DetailNote` のかわりに
+  `GrownUpNote`（大人向けメモ）。強調つきの説明は `ui/myna_text.tsx` の
+  `emphasize`
+- 表記のルールは `docs/myna/WRITING.md`、章の構成は `docs/myna/PLAN.md`。
+  漢字の単語を書いたら `web/client/ruby/words.ts` に読みを足す。
+  `web/server/text_rules.test.ts` が読みの抜け・配当表外の漢字などを見つける
 
 ## 環境変数
 

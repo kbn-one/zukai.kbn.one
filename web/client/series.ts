@@ -29,12 +29,17 @@ export interface Series {
   /** One line under the name, on the home page and the 図解's own top page. */
   lead: string;
   icon: IconName;
+  /**
+   * Set readings above every kanji the shell prints for this 図解 — for one written for children.
+   * Its own pages and islands opt in on their own, with the `ruby-jsx` runtime (`ruby/`).
+   */
+  ruby?: boolean;
   /** The 図解's own top page. */
   index: { href(): string };
   chapters: readonly Chapter[];
 }
 
-export type SeriesKey = "ai";
+export type SeriesKey = "ai" | "myna";
 
 export const series: readonly Series[] = [
   {
@@ -84,6 +89,81 @@ export const series: readonly Series[] = [
         lead:
           "使っている間、モデルの中身は1つも変わりません。だからあなたの話が、モデルを通ってほかの人にもれることはありません。",
         icon: "lock",
+      },
+    ],
+  },
+  {
+    key: "myna",
+    title: "マイナンバーカードのひみつ",
+    lead:
+      "ICチップの中身、こわされにくさ、スマホ、本人確認、名前を出さないログインまで。小学生にもわかる言葉で説明します。",
+    icon: "card",
+    ruby: true,
+    index: routes.myna.index,
+    chapters: [
+      {
+        route: routes.myna.inside,
+        short: "ICチップ",
+        title: "ICチップには何ができる？",
+        lead:
+          "金色のICチップは、メモ帳じゃなくて小さなコンピューター。できること・できないことを見てみよう。",
+        icon: "chip",
+      },
+      {
+        route: routes.myna.tamper,
+        short: "こわすと守る",
+        title: "むりやり開けようとすると、どうなる？",
+        lead:
+          "チップは「金庫」。こじあけようとすると、中身を守るしくみがあるよ。",
+        icon: "shield",
+      },
+      {
+        route: routes.myna.phone,
+        short: "スマホの中",
+        title: "スマホにマイナンバーカードが入るって、どういうこと？",
+        lead:
+          "カードをコピーするんじゃない。スマホの金庫に「スマホ用のカギ」を作るんだ。",
+        icon: "phone",
+      },
+      {
+        route: routes.myna.auth,
+        short: "本人確認",
+        title: "どうやって「本人だ」とわかるの？",
+        lead:
+          "毎回ちがう問題に、ひみつのカギで電子署名をつけてもらって、本物かどうか確かめるよ。",
+        icon: "key",
+      },
+      {
+        route: routes.myna.anonymous,
+        short: "名前を出さない",
+        title: "名前を教えずに「本物の人」だと伝えられる？",
+        lead:
+          "お店ごとにちがう番号を使えば、名前を言わなくてもログインできる。",
+        icon: "userOff",
+      },
+      {
+        route: routes.myna.digitalAuthApp,
+        short: "デジタル認証アプリ",
+        title: "デジタル庁の「デジタル認証アプリ」",
+        lead:
+          "いろいろなサイトが、マイナンバーカードでのログインを無料で使えるしくみ。",
+        icon: "landmark",
+      },
+      {
+        route: routes.myna.signature,
+        short: "電子署名",
+        title: "電子署名を、自分で作ってみよう",
+        lead:
+          "アリスさんがボブさんに手紙を送るよ。本当にアリスさんが書いたと、ボブさんはどうやってわかるのかな？",
+        icon: "sign",
+      },
+      {
+        route: routes.myna.license,
+        short: "スマホ免許証",
+        title: "スマホが運転免許証になる日は来る？",
+        lead:
+          "今は、カードを持っていないと運転できない。国は、スマホだけで運転できるようにする道を考えているよ。",
+        icon: "car",
       },
     ],
   },
