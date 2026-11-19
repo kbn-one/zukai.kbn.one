@@ -3,7 +3,8 @@
  *
  * A tells the AI something private; B then asks about A. While A talks, the model's numbers light
  * up — they are being read — but none of them changes, and the fingerprint stays put. What A said
- * went into A's memory, in the harness. B's turn reads the same unchanged model with B's memory,
+ * went into the memory of A's own harness. B's turn goes through B's harness and reads the same
+ * unchanged model with B's memory,
  * so there is nothing of A's for it to find. The last button shows the world this is not: a model
  * that was written to as people talked would carry A's words to B.
  */
@@ -44,8 +45,8 @@ const WRITTEN = new Set([3, 8, 14, 19]);
 const captions: Record<Phase, string> = {
   start:
     "モデルの中身は、たくさんの<数字>（ここでは24こだけ。本物は数百億こ以上）。この数字が、モデルの「知識」や「言葉のくせ」になっている。",
-  a: `Aさんが「${A_SAYS}」と話した。モデルの数字は<読まれた>けど、<1つも変わっていない>。指紋も同じ。Aさんの話は、ハーネスの<Aさんのメモリ>に入った。`,
-  b: `Bさんが「${B_ASKS}」と聞いた。モデルは同じ数字のまま、Bさんのメモリだけを見て答える。Aさんの話は<どこにも入っていない>から、もれようがない。`,
+  a: `Aさんが「${A_SAYS}」と話した。モデルの数字は<読まれた>けど、<1つも変わっていない>。指紋も同じ。Aさんの話は、<Aさんのハーネス>のメモリに入った。`,
+  b: `Bさんが「${B_ASKS}」と聞いた。Bさんのハーネスにあるのは、Bさんのメモリだけ。モデルは同じ数字のまま、それを見て答える。Aさんの話は<どこにも入っていない>から、もれようがない。`,
   whatif:
     `<もしも>話すたびにモデルの数字が書きかわるとしたら……Aさんの話がモデルにしみこんで、Bさんに<もれてしまう>。チャットAIを使っているあいだ、<こうはならない>。`,
 };
@@ -81,29 +82,34 @@ export const Readonly = clientEntry(
         <div>
           <div mix={layoutStyle}>
             <div mix={sideStyle}>
-              <Party role="user" name="Aさん" active={phase === "a"}>
-                {aSpoke ? <Chip>{A_SAYS}</Chip> : null}
-              </Party>
-              <Party role="user" name="Bさん" active={phase === "b"}>
-                {bAsked ? <Chip>{B_ASKS}</Chip> : null}
-                {bAsked
-                  ? (
-                    <Chip tone="answer" fresh key={phase}>
-                      {whatif ? B_LEAK : B_ANSWER}
-                    </Chip>
-                  )
-                  : null}
-              </Party>
+              <div mix={laneStyle}>
+                <Party role="user" name="Aさん" active={phase === "a"}>
+                  {aSpoke ? <Chip>{A_SAYS}</Chip> : null}
+                </Party>
+                <Party role="harness" name="Aさんのハーネス">
+                  <Party role="memory">
+                    {aSpoke ? <Chip tone="memory">{A_SAYS}</Chip> : null}
+                  </Party>
+                </Party>
+              </div>
+              <div mix={laneStyle}>
+                <Party role="user" name="Bさん" active={phase === "b"}>
+                  {bAsked ? <Chip>{B_ASKS}</Chip> : null}
+                  {bAsked
+                    ? (
+                      <Chip tone="answer" fresh key={phase}>
+                        {whatif ? B_LEAK : B_ANSWER}
+                      </Chip>
+                    )
+                    : null}
+                </Party>
+                <Party role="harness" name="Bさんのハーネス">
+                  <Party role="memory">
+                    {bAsked ? <Chip tone="memory">{B_ASKS}</Chip> : null}
+                  </Party>
+                </Party>
+              </div>
             </div>
-
-            <Party role="harness">
-              <Party role="memory" name="Aさん" note="のメモリ">
-                {aSpoke ? <Chip tone="memory">{A_SAYS}</Chip> : null}
-              </Party>
-              <Party role="memory" name="Bさん" note="のメモリ">
-                {bAsked ? <Chip tone="memory">{B_ASKS}</Chip> : null}
-              </Party>
-            </Party>
 
             <Party
               role="model"
@@ -192,9 +198,17 @@ export const Readonly = clientEntry(
 
 const layoutStyle = css({
   display: "grid",
-  gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr)",
+  gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1.3fr)",
   gap: "0.75rem",
   "@media (max-width: 720px)": { gridTemplateColumns: "minmax(0, 1fr)" },
+});
+
+/** One person and their own harness, side by side. */
+const laneStyle = css({
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+  gap: "0.5rem",
+  "@media (max-width: 480px)": { gridTemplateColumns: "minmax(0, 1fr)" },
 });
 
 const sideStyle = css({

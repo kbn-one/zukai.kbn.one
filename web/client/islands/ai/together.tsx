@@ -86,7 +86,7 @@ export const Together = clientEntry(
 
     return () => {
       const caption = phase === "idle"
-        ? "3人が、同じタイミングで、ちがう質問を送ったとしよう。モデルは1つしかない。"
+        ? "3人が、それぞれ自分のハーネスから、同じタイミングでちがう質問を送ったとしよう。3つのハーネスの台本は、<同じ推論エンジン>にとどく。モデルは1つしかない。"
         : phase === "running"
         ? `推論エンジンは3人分を<1つのたばにして>、モデルに通す。1回の計算で、<3人それぞれの>つぎの言葉が出る。（${passes}回目）`
         : `<${passes}回>の計算で、3人とも答えが出た。1人ずつ順番なら${oneByOne}回かかるところ。答えはそれぞれ、<質問した本人にだけ>返る。`;
@@ -96,7 +96,12 @@ export const Together = clientEntry(
           <div mix={layoutStyle}>
             <div mix={usersStyle}>
               {talks.map((t) => (
-                <Party key={t.who} role="user" name={t.who}>
+                <Party
+                  key={t.who}
+                  role="user"
+                  name={t.who}
+                  note={`→ ${t.who}のハーネス`}
+                >
                   <Chip>{t.question}</Chip>
                   {phase === "done"
                     ? <Chip tone="answer" fresh>{t.answer.join("")}</Chip>

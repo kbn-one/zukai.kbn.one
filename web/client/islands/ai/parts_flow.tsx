@@ -45,7 +45,7 @@ const ANSWER = [
 const steps: Step[] = [
   {
     caption:
-      "チャットAIを使うとき、あなたが直接やりとりしているのは<ハーネス>。その奥に<推論エンジン>があって、エンジンの中で<モデル>が使われる。",
+      "チャットAIを使うとき、あなたが直接やりとりしているのは、<あなた専用のハーネス>。その奥に<推論エンジン>があって、エンジンの中で<モデル>が使われる。",
     focus: [],
     flow: null,
     script: 0,
@@ -125,7 +125,12 @@ export const PartsFlow = clientEntry(
               active={s.flow === "in" || s.flow === "back"}
               back={s.flow === "back"}
             />
-            <Party role="harness" active={hot("harness")} dim={!on("harness")}>
+            <Party
+              role="harness"
+              name="あなたのハーネス"
+              active={hot("harness")}
+              dim={!on("harness")}
+            >
               <Party
                 role="memory"
                 note="あなた専用"

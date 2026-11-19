@@ -41,26 +41,28 @@ export default function AiIndex(_handle: Handle) {
       </header>
 
       <section aria-label="全体図" mix={overviewStyle}>
-        <div mix={columnStyle}>
-          {people.map((p) => <Party key={p.who} role="user" name={p.who} />)}
+        {people.map((p, i) => (
+          <div key={p.who} mix={laneStyle} style={{ gridRow: i + 1 }}>
+            <Party role="user" name={p.who} />
+            <Flow />
+            <Party role="harness" name={`${p.who}のハーネス`}>
+              <Party role="memory" note={`${p.who}の分だけ`}>
+                <Chip tone="memory">{p.memo}</Chip>
+              </Party>
+            </Party>
+            <Flow label="台本" />
+          </div>
+        ))}
+        <div mix={engineCellStyle}>
+          <Party role="engine" note="みんなで共有。モデルを読んで計算する">
+            {[1, 2, 3].map((n) => (
+              <Party key={n} role="model" name={`モデル（コピー${n}）`}>
+                <Fingerprint value={MODEL_FINGERPRINT} />
+                <Chip>読むだけ</Chip>
+              </Party>
+            ))}
+          </Party>
         </div>
-        <Flow />
-        <Party role="harness" note="受付。人ごとのメモリを持つ">
-          {people.map((p) => (
-            <Party key={p.who} role="memory" name={`${p.who}のメモリ`}>
-              <Chip tone="memory">{p.memo}</Chip>
-            </Party>
-          ))}
-        </Party>
-        <Flow label="台本" />
-        <Party role="engine" note="モデルを読んで計算する">
-          {[1, 2, 3].map((n) => (
-            <Party key={n} role="model" name={`モデル（コピー${n}）`}>
-              <Fingerprint value={MODEL_FINGERPRINT} />
-              <Chip>読むだけ</Chip>
-            </Party>
-          ))}
-        </Party>
       </section>
 
       <Summary>
@@ -72,14 +74,19 @@ export default function AiIndex(_handle: Handle) {
             1つのモデルが、<strong>何人もの相手を同時に</strong>している。
           </li>
           <li>
-            <strong>
-              メモリはハーネスにくっついていて
-            </strong>、人ごとに分かれている。
+            1人に1つ、<strong>
+              その人専用のハーネス
+            </strong>があって、メモリはそこにくっついている。
           </li>
           <li>
             モデルには<strong>
               書きこまれない
             </strong>から、だれかの話がほかの人にまざることはない。
+          </li>
+          <li>
+            ローカルLLMなら、この全部が<strong>
+              自分のパソコンの中
+            </strong>だけで動く。
           </li>
         </ul>
       </Summary>
@@ -104,14 +111,27 @@ const eyebrowStyle = css({
 
 const overviewStyle = css({
   display: "grid",
-  gridTemplateColumns:
-    "minmax(0, 0.8fr) auto minmax(0, 1.3fr) auto minmax(0, 1.3fr)",
-  alignItems: "start",
+  gridTemplateColumns: "minmax(0, 2.6fr) minmax(0, 1.2fr)",
+  gap: "0.75rem",
+  "@media (max-width: 640px)": { gridTemplateColumns: "minmax(0, 1fr)" },
+});
+
+/** One person's row: the person, their own harness, and the arrow to the shared engine. */
+const laneStyle = css({
+  gridColumn: 1,
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 0.7fr) auto minmax(0, 1.3fr) auto",
+  alignItems: "center",
   gap: "0.5rem",
   "@media (max-width: 640px)": { gridTemplateColumns: "minmax(0, 1fr)" },
 });
 
-const columnStyle = css({ display: "grid", gap: "0.5rem" });
+/** The engine spans every person's row: they all reach the same one. */
+const engineCellStyle = css({
+  gridColumn: 2,
+  gridRow: "1 / span 3",
+  "@media (max-width: 640px)": { gridColumn: 1, gridRow: "auto" },
+});
 
 const pointsStyle = css({
   margin: 0,

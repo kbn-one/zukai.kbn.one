@@ -23,5 +23,6 @@ export const routes = route(base, {
     together: get("/together"),
     memory: get("/memory"),
     readonly: get("/readonly"),
+    local: get("/local"),
   }),
 });

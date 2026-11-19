@@ -22,7 +22,7 @@ export default function TogetherPage(_handle: Handle) {
     <>
       <ChapterHead chapter={routes.ai.together}>
         <p>
-          コピーの1つ1つも、1人専用ではありません。あなたが話しているその瞬間、<strong>
+          ハーネスは1人に1つずつありますが、その先の推論エンジンとモデルは、みんなで共有しています。コピーの1つ1つも、1人専用ではありません。あなたが話しているその瞬間、<strong>
             同じコピーが、ほかの人の質問にも答えています
           </strong>。
         </p>
