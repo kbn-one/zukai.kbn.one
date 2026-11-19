@@ -37,6 +37,15 @@ import * as AiCopies from "../client/pages/ai/copies.tsx";
 import * as AiTogether from "../client/pages/ai/together.tsx";
 import * as AiMemory from "../client/pages/ai/memory.tsx";
 import * as AiReadonly from "../client/pages/ai/readonly.tsx";
+import * as MynaIndex from "../client/pages/myna/index.tsx";
+import * as MynaInside from "../client/pages/myna/inside.tsx";
+import * as MynaTamper from "../client/pages/myna/tamper.tsx";
+import * as MynaPhone from "../client/pages/myna/phone.tsx";
+import * as MynaAuth from "../client/pages/myna/auth.tsx";
+import * as MynaAnonymous from "../client/pages/myna/anonymous.tsx";
+import * as MynaDigitalAuthApp from "../client/pages/myna/digital_auth_app.tsx";
+import * as MynaSignature from "../client/pages/myna/signature.tsx";
+import * as MynaLicense from "../client/pages/myna/license.tsx";
 
 /** Deploy path prefix. The build strips it back off when writing, so output lands at the root. */
 export { base };
@@ -72,7 +81,7 @@ function pageAction(
         script={page.hydrate ? clientRuntime : null}
         series={series}
         current={route.href()}
-        wide={series === undefined}
+        wide={page.wide ?? series === undefined}
       >
         <Page />
       </Layout>,
@@ -114,8 +123,28 @@ const ai = createController(routes.ai, {
   },
 });
 
+/** マイナンバーカードのひみつ. */
+const myna = createController(routes.myna, {
+  actions: {
+    index: pageAction(routes.myna.index, MynaIndex, "myna"),
+    inside: pageAction(routes.myna.inside, MynaInside, "myna"),
+    tamper: pageAction(routes.myna.tamper, MynaTamper, "myna"),
+    phone: pageAction(routes.myna.phone, MynaPhone, "myna"),
+    auth: pageAction(routes.myna.auth, MynaAuth, "myna"),
+    anonymous: pageAction(routes.myna.anonymous, MynaAnonymous, "myna"),
+    digitalAuthApp: pageAction(
+      routes.myna.digitalAuthApp,
+      MynaDigitalAuthApp,
+      "myna",
+    ),
+    signature: pageAction(routes.myna.signature, MynaSignature, "myna"),
+    license: pageAction(routes.myna.license, MynaLicense, "myna"),
+  },
+});
+
 router.map(routes, top);
 router.map(routes.ai, ai);
+router.map(routes.myna, myna);
 
 router.get(`${base}/static/*path`, ({ request }) => staticFiles.fetch(request));
 router.get(`${assetsPath}/*path`, ({ request }) => assets.fetch(request));

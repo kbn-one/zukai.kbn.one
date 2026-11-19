@@ -22,7 +22,14 @@ import { base, BASE_META_NAME } from "./base.ts";
 import { routes } from "./routes.ts";
 import { type SeriesKey, seriesOf } from "./series.ts";
 import { color, contentWidth, font, wideWidth } from "./tokens.ts";
+import { readings } from "./ruby/readings.ts";
 import { Icon } from "./ui/icons.tsx";
+import { MynaFootnote } from "./ui/myna_footnote.tsx";
+
+/** A 図解 whose footer says something of its own, in place of the site's line. */
+const footnotes: Partial<Record<SeriesKey, typeof MynaFootnote>> = {
+  myna: MynaFootnote,
+};
 
 /** What every page hands the shell. */
 export interface LayoutProps {
@@ -67,6 +74,8 @@ export interface PageModule<Props = Record<string, never>> {
   description?: string;
   /** Whether the page places a client entry, so the shell boots the runtime for it. */
   hydrate: boolean;
+  /** Lay the page out at the wider measure. Defaults to wide for the site's own pages only. */
+  wide?: boolean;
 }
 
 /** The site's name, in the header and on the home page's social card. */
@@ -82,6 +91,7 @@ export function Layout(handle: Handle<LayoutProps>) {
   return () => {
     const props = handle.props;
     const s = props.series ? seriesOf(props.series) : null;
+    const Footnote = s ? footnotes[s.key] : undefined;
 
     return (
       <html lang="ja">
@@ -144,7 +154,7 @@ export function Layout(handle: Handle<LayoutProps>) {
                         <span mix={brandMarkStyle} aria-hidden="true">
                           <Icon name={s.icon} size="1.1rem" />
                         </span>
-                        {s.title}
+                        {s.ruby ? readings(s.title) : s.title}
                       </a>
                     </>
                   )
@@ -163,7 +173,7 @@ export function Layout(handle: Handle<LayoutProps>) {
                         mix={navLinkStyle}
                       >
                         <span mix={navNumStyle}>{i + 1}</span>
-                        {c.short}
+                        {s.ruby ? readings(c.short) : c.short}
                       </a>
                     ))}
                   </nav>
@@ -176,9 +186,11 @@ export function Layout(handle: Handle<LayoutProps>) {
           </main>
           <footer mix={footerStyle}>
             <div mix={[bandStyle, wideBandStyle]}>
-              <p>
-                しくみを、動く図でざっくり説明するサイトです。わかりやすさのために、たとえ話を使ったり、こまかいところを省いたりしています。
-              </p>
+              {Footnote ? <Footnote /> : (
+                <p>
+                  しくみを、動く図でざっくり説明するサイトです。わかりやすさのために、たとえ話を使ったり、こまかいところを省いたりしています。
+                </p>
+              )}
             </div>
           </footer>
           {props.script

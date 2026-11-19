@@ -181,6 +181,18 @@
     font: inherit;
   }
 
+  /*
+   * Every kanji carries its reading in 図解 written for children (`client/ruby/`). Small and light, so a line of text
+   * still reads as text; the body's line height already has room for it above each line.
+   */
+  rt {
+    font-size: 0.5em;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0;
+    font-feature-settings: normal;
+  }
+
   svg text {
     font-family: var(--font-sans);
   }
