@@ -46,7 +46,7 @@ export const series: readonly Series[] = [
     key: "ai",
     title: "図解AI",
     lead:
-      "チャットAIの中身は、モデル・推論エンジン・ハーネスの3つ。たくさんの人と同時に話せるのに、話がまざらないのはなぜ？",
+      "チャットAIの中身は、モデル・推論エンジン・ハーネスの3つ。たくさんの人と同時に話せるのに、話がまざらないのはなぜ？ ローカルLLMとのちがいは？",
     icon: "layers",
     index: routes.ai.index,
     chapters: [
@@ -77,9 +77,9 @@ export const series: readonly Series[] = [
       {
         route: routes.ai.memory,
         short: "メモリ",
-        title: "「覚えている」のは、ハーネスのメモリ",
+        title: "「覚えている」のは、あなたのハーネスのメモリ",
         lead:
-          "前の会話を覚えているように見えるのは、ハーネスが人ごとのメモリを毎回モデルに見せているから。",
+          "ハーネスは1人に1つ。前の会話を覚えているように見えるのは、あなたのハーネスが、あなたのメモリを毎回モデルに見せているから。",
         icon: "database",
       },
       {
@@ -89,6 +89,14 @@ export const series: readonly Series[] = [
         lead:
           "使っている間、モデルの中身は1つも変わりません。だからあなたの話が、モデルを通ってほかの人にもれることはありません。",
         icon: "lock",
+      },
+      {
+        route: routes.ai.local,
+        short: "ローカルLLM",
+        title: "ローカルLLMなら、全部が自分のパソコンの中",
+        lead:
+          "モデルを自分のパソコンにダウンロードして動かすと、3つの部品がすべて手元にそろいます。クラウドのAIと何がちがう？",
+        icon: "monitor",
       },
     ],
   },

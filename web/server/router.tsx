@@ -37,6 +37,7 @@ import * as AiCopies from "../client/pages/ai/copies.tsx";
 import * as AiTogether from "../client/pages/ai/together.tsx";
 import * as AiMemory from "../client/pages/ai/memory.tsx";
 import * as AiReadonly from "../client/pages/ai/readonly.tsx";
+import * as AiLocal from "../client/pages/ai/local.tsx";
 import * as MynaIndex from "../client/pages/myna/index.tsx";
 import * as MynaInside from "../client/pages/myna/inside.tsx";
 import * as MynaTamper from "../client/pages/myna/tamper.tsx";
@@ -120,6 +121,7 @@ const ai = createController(routes.ai, {
     together: pageAction(routes.ai.together, AiTogether, "ai"),
     memory: pageAction(routes.ai.memory, AiMemory, "ai"),
     readonly: pageAction(routes.ai.readonly, AiReadonly, "ai"),
+    local: pageAction(routes.ai.local, AiLocal, "ai"),
   },
 });
 

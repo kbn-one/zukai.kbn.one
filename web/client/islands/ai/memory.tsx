@@ -1,8 +1,8 @@
 /**
- * 図解AI chapter 4: memory belongs to the harness, one drawer per person.
+ * 図解AI chapter 4: memory belongs to the harness, and each person has a harness of their own.
  *
  * Three people ask the same model the same question and get different answers, because the
- * harness puts each person's own memory into what the model reads. Adding to the memory changes
+ * person's own harness puts their memory into what the model reads. Adding to the memory changes
  * the next answer; the model's fingerprint stays where it was.
  */
 
@@ -22,7 +22,6 @@ import {
   primaryStyle,
 } from "../../ui/controls.tsx";
 import { Icon } from "../../ui/icons.tsx";
-import { art, color, font, radius } from "../../tokens.ts";
 
 const QUESTION = "今夜のごはん、何がいい？";
 
@@ -111,29 +110,25 @@ export const Memory = clientEntry(
               </Chip>
             </Party>
             <Flow />
-            <Party role="harness" note="人ごとの引き出し">
-              <div mix={drawersStyle}>
-                {people.map((x, i) => (
-                  <div
-                    key={x.who}
-                    mix={[drawerStyle, i === current ? openStyle : null]}
-                  >
-                    <span mix={drawerNameStyle}>
-                      <Icon
-                        name={i === current ? "database" : "lock"}
-                        size="1rem"
-                      />
-                      {x.who}のメモリ
-                    </span>
-                    {i === current
-                      ? memory.map((m) => (
-                        <Chip key={m} tone="memory" fresh>{m}</Chip>
-                      ))
-                      : <small>ほかの人のものは使わない</small>}
-                  </div>
-                ))}
-              </div>
-            </Party>
+            <div mix={harnessesStyle}>
+              {people.map((x, i) => (
+                <Party
+                  key={x.who}
+                  role="harness"
+                  name={`${x.who}のハーネス`}
+                  active={i === current}
+                  dim={i !== current}
+                >
+                  <Party role="memory">
+                    {(added[i] ? [...x.memory, x.extra] : x.memory).map((m) => (
+                      <Chip key={m} tone="memory" fresh={i === current}>
+                        {m}
+                      </Chip>
+                    ))}
+                  </Party>
+                </Party>
+              ))}
+            </div>
             <Flow label="台本" />
             <Party role="engine">
               <Party role="model" note="3人とも同じ">
@@ -149,8 +144,8 @@ export const Memory = clientEntry(
           <p mix={captionStyle} key={`${current}-${justAdded}`}>
             {emphasize(
               justAdded
-                ? `「${p.extra}」を<${p.who}のメモリ>に足した。つぎの答えが変わったね。でも、モデルの指紋は<${MODEL_FINGERPRINT}>のまま。覚えたのはハーネスで、モデルじゃない。`
-                : `同じモデルに同じ質問をしても、答えはちがう。ハーネスが<${p.who}のメモリだけ>を台本に入れて、モデルに見せているから。`,
+                ? `「${p.extra}」を<${p.who}のメモリ>に足した。つぎの答えが変わったね。でも、モデルの指紋は<${MODEL_FINGERPRINT}>のまま。覚えたのは${p.who}のハーネスで、モデルじゃない。`
+                : `同じモデルに同じ質問をしても、答えはちがう。<${p.who}のハーネス>が、${p.who}のメモリを台本に入れてモデルに見せているから。ほかの人のハーネスとメモリは、まったく別のもの。`,
             )}
           </p>
           <button
@@ -181,36 +176,7 @@ const rowStyle = css({
   "@media (max-width: 640px)": { gridTemplateColumns: "minmax(0, 1fr)" },
 });
 
-const drawersStyle = css({ display: "grid", gap: "0.4rem", width: "100%" });
-
-const drawerStyle = css({
-  display: "flex",
-  flexWrap: "wrap",
-  alignItems: "center",
-  gap: "0.3rem",
-  padding: "0.4rem 0.5rem",
-  border: `1px dashed ${color.line}`,
-  borderRadius: radius.sm,
-  background: color.surface,
-  opacity: 0.6,
-  "& small": { color: color.muted, fontSize: "0.75rem" },
-});
-
-const openStyle = css({
-  opacity: 1,
-  borderStyle: "solid",
-  borderColor: art.warm,
-  background: art.goldSoft,
-});
-
-const drawerNameStyle = css({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "0.3rem",
-  flexBasis: "100%",
-  fontFamily: font.round,
-  fontWeight: 800,
-  fontSize: "0.85rem",
-});
+/** The three harnesses, one per person, stacked. */
+const harnessesStyle = css({ display: "grid", gap: "0.4rem" });
 
 const scriptStyle = css({ display: "flex", flexWrap: "wrap", gap: "0.3rem" });
