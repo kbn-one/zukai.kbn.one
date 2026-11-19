@@ -1,6 +1,6 @@
-name: deno-remix-reference
+name: zukai.kbn.one
 version: 1.0.0
-description: APM project for deno-remix-reference
+description: APM project for zukai.kbn.one
 author: Ohkubo KOHEI
 dependencies:
   apm:

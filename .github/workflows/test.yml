@@ -17,8 +17,6 @@ jobs:
       - run: deno task check
       - run: deno task test
       - run: deno task build
-      - run: deno task build:cf
-      - run: deno task cf deploy --prebuilt --dry-run
       # @lightpanda/browser >= 1.6 no longer fetches its binary on install.
       - run: deno task lightpanda:install
       - run: deno task test:browser

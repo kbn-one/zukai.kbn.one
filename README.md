@@ -1,16 +1,13 @@
-# deno-remix-tmpl
+# zukai.kbn.one
 
-Remix v3 + Deno のリファレンス実装 (DPoP セッションマネージャー付き)。
+身のまわりのしくみを、さわって動かせる図で説明する図解集。
+1つのリポジトリに、図解ごとのサブディレクトリで並べる。
 
-## デモ
+| 図解   | パス   | 内容                                                                       |
+| ------ | ------ | -------------------------------------------------------------------------- |
+| 図解AI | `/ai/` | チャットAIの中身（モデル・推論エンジン・ハーネス）と、話がまざらないしくみ |
 
-- GitHub Pages (静的版): <https://kuboon.github.io/deno-remix-tmpl/>
-- Cloudflare Workers (サーバー版、`/api/*` あり):
-  <https://deno-remix-tmpl.kuboon.workers.dev/>
-
-このリポジトリは GitHub テンプレート。新しいアプリを作るときの手順は
-[TEMPLATE.md](./TEMPLATE.md)（static / server
-モードの選択、改変、不要機能の削除）、 開発のルールは [CLAUDE.md](./CLAUDE.md)
-を参照。
-
-ref: https://github.com/remix-run/remix
+Remix v3 + Deno の静的サイト。GitHub Pages に出す。
+[kuboon/deno-remix-tmpl](https://github.com/kuboon/deno-remix-tmpl) から作り、
+章の部品は [kuboon/myna-how](https://github.com/kuboon/myna-how) にならった。
+開発のルールは [CLAUDE.md](./CLAUDE.md)。
