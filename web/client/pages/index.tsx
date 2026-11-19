@@ -1,107 +1,86 @@
+/**
+ * The site's top page: the shelf of 図解, one card each.
+ */
+
 import { css, type Handle } from "@remix-run/component";
 
-import { routes } from "../routes.ts";
-import { cardStyle } from "../theme.ts";
+import { SITE_NAME } from "../layout.tsx";
+import { series } from "../series.ts";
+import { art, color, font, radius } from "../tokens.ts";
+import { Icon } from "../ui/icons.tsx";
 
-export const title = "Remix3 on Deno Template";
+export const title = `${SITE_NAME} — 動く図で、しくみをざっくり`;
 export const description =
-  "Remix v3 + Deno reference app with a DPoP session middleware. Served live on Deno Deploy and statically on GitHub Pages.";
+  "身のまわりのしくみを、さわって動かせる図で説明する図解集。";
 
-/** The shell places the sign-in island, so every page boots the runtime. */
-export const hydrate = true;
+export const hydrate = false;
 
 export default function Home(_handle: Handle) {
   return () => (
     <>
-      <h1>Remix3 on Deno Template</h1>
-      <p>Deno + Remix v3 (fetch-router) リファレンス実装。</p>
-      <p>
-        デモ:{" "}
-        <a href="https://kuboon.github.io/deno-remix-tmpl/">
-          GitHub Pages (静的版)
-        </a>
-        {" / "}
-        <a href="https://deno-remix-tmpl.kuboon.workers.dev/">
-          Cloudflare Workers (サーバー版)
-        </a>
-      </p>
-
-      <section mix={cardStyle}>
-        <h2>構成</h2>
-        <ul mix={listStyle}>
-          <li>
-            <code>packages/remix-dpop-session-middleware/</code>{" "}
-            — DPoP セッション middleware (Remix v3 fetch-router)
-          </li>
-          <li>
-            <code>packages/session-storage-kv/</code>{" "}
-            — Remix v3 SessionStorage を KvRepo で実装
-          </li>
-          <li>
-            <code>web/</code> — この Web アプリ。<code>client/</code>{" "}
-            がブラウザへ渡るもの全て、<code>server/</code> がルーターと API
-          </li>
-        </ul>
-      </section>
-
-      <section mix={cardStyle}>
-        <h2>デプロイ</h2>
+      <header mix={heroStyle}>
+        <h1>動く図で、しくみをざっくり</h1>
         <p>
-          同じ <code>web/server/router.tsx</code>{" "}
-          から静的サイトを作り、2 通りに配信します。
+          身のまわりのしくみを、さわって動かせる図で説明します。気になるものから読んでください。
         </p>
-        <ul mix={listStyle}>
-          <li>
-            <strong>Cloudflare Workers</strong>{" "}
-            — 静的ビルドを Workers の static assets として配信し、<code>
-              /api/*
-            </code>{" "}
-            だけを Worker (<code>web/server/worker.ts</code>) が答える。
-          </li>
-          <li>
-            <strong>GitHub Pages</strong>{" "}
-            — ビルドが同じルーターをクロールして 静的 HTML にする。<code>
-              /api/*
-            </code>{" "}
-            は静的化しない。
-          </li>
-        </ul>
-      </section>
+      </header>
 
-      <section mix={cardStyle}>
-        <h2>API エンドポイント (Cloudflare Workers のみ)</h2>
-        <ul mix={listStyle}>
-          <li>
-            <code>GET {routes.api.protected.get.href()}</code>{" "}
-            — DPoP proof 必須。セッションデータを返す
+      <ul mix={gridStyle}>
+        {series.map((s) => (
+          <li key={s.key}>
+            <a href={s.index.href()} mix={cardStyle}>
+              <span mix={iconStyle}>
+                <Icon name={s.icon} size="2rem" />
+              </span>
+              <strong>{s.title}</strong>
+              <span>{s.lead}</span>
+              <small>{s.chapters.length}章</small>
+            </a>
           </li>
-          <li>
-            <code>POST {routes.api.protected.post.href()}</code>{" "}
-            — DPoP proof 必須。リクエスト body をセッションにマージ
-          </li>
-          <li>
-            <code>POST {routes.api.notify.href()}</code>{" "}
-            — サーバー起点のプッシュ通知 (id.kbn.one 経由)
-          </li>
-          <li>
-            <code>GET {routes.api.turso.href()}</code> — Turso (libSQL) +{" "}
-            <code>@remix-run/data-table</code> のサンプル
-          </li>
-          <li>
-            <code>GET {routes.jwks.href()}</code> — RP の公開 JWKS
-          </li>
-        </ul>
-      </section>
-
-      <p>
-        <a href={routes.hydration.href()}>Hydration のサンプル →</a>{" "}
-        <a href={routes.my.href()}>マイページ →</a>
-      </p>
+        ))}
+      </ul>
     </>
   );
 }
 
-const listStyle = css({
-  paddingLeft: "1.1rem",
-  "& li": { marginBlock: "0.4rem" },
+const heroStyle = css({
+  marginBottom: "2.5rem",
+  "& p": { fontSize: "1.15rem", color: color.muted },
+});
+
+const gridStyle = css({
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fill, minmax(min(20rem, 100%), 1fr))",
+  gap: "1rem",
+  margin: 0,
+  padding: 0,
+  listStyle: "none",
+  "& li": { margin: 0 },
+});
+
+const cardStyle = css({
+  display: "flex",
+  flexDirection: "column",
+  gap: "0.6rem",
+  height: "100%",
+  padding: "1.5rem",
+  border: "2px solid transparent",
+  borderRadius: radius.lg,
+  background: color.surface,
+  color: color.fg,
+  textDecoration: "none",
+  "&:hover": { borderColor: color.accent, color: color.fg },
+  "& strong": { fontFamily: font.round, fontWeight: 800, fontSize: "1.5rem" },
+  "& > span:not(:first-child)": { color: color.muted, lineHeight: 1.8 },
+  "& small": { color: color.accent, fontWeight: 700 },
+});
+
+const iconStyle = css({
+  display: "grid",
+  placeItems: "center",
+  width: "3.5rem",
+  height: "3.5rem",
+  borderRadius: "1rem",
+  background: art.softBlue,
+  color: color.accent,
 });
