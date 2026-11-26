@@ -311,6 +311,29 @@
     }
   }
 
+  /* Something arriving along a wire and stopping in its middle (図解パスキー). */
+  @keyframes arrive-right {
+    from {
+      transform: translateX(-35%);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  @keyframes arrive-left {
+    from {
+      transform: translateX(35%);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
   @keyframes stamp {
     0% {
       transform: scale(2) rotate(-12deg);

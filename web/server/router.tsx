@@ -47,6 +47,14 @@ import * as MynaAnonymous from "../client/pages/myna/anonymous.tsx";
 import * as MynaDigitalAuthApp from "../client/pages/myna/digital_auth_app.tsx";
 import * as MynaSignature from "../client/pages/myna/signature.tsx";
 import * as MynaLicense from "../client/pages/myna/license.tsx";
+import * as PasskeyIndex from "../client/pages/passkey/index.tsx";
+import * as PasskeyPassword from "../client/pages/passkey/password.tsx";
+import * as PasskeyKeys from "../client/pages/passkey/keys.tsx";
+import * as PasskeyDevice from "../client/pages/passkey/device.tsx";
+import * as PasskeyPhishing from "../client/pages/passkey/phishing.tsx";
+import * as PasskeyFlow from "../client/pages/passkey/flow.tsx";
+import * as PasskeySync from "../client/pages/passkey/sync.tsx";
+import * as PasskeyMyths from "../client/pages/passkey/myths.tsx";
 
 /** Deploy path prefix. The build strips it back off when writing, so output lands at the root. */
 export { base };
@@ -144,9 +152,24 @@ const myna = createController(routes.myna, {
   },
 });
 
+/** 図解パスキー. */
+const passkey = createController(routes.passkey, {
+  actions: {
+    index: pageAction(routes.passkey.index, PasskeyIndex, "passkey"),
+    password: pageAction(routes.passkey.password, PasskeyPassword, "passkey"),
+    keys: pageAction(routes.passkey.keys, PasskeyKeys, "passkey"),
+    device: pageAction(routes.passkey.device, PasskeyDevice, "passkey"),
+    phishing: pageAction(routes.passkey.phishing, PasskeyPhishing, "passkey"),
+    flow: pageAction(routes.passkey.flow, PasskeyFlow, "passkey"),
+    sync: pageAction(routes.passkey.sync, PasskeySync, "passkey"),
+    myths: pageAction(routes.passkey.myths, PasskeyMyths, "passkey"),
+  },
+});
+
 router.map(routes, top);
 router.map(routes.ai, ai);
 router.map(routes.myna, myna);
+router.map(routes.passkey, passkey);
 
 router.get(`${base}/static/*path`, ({ request }) => staticFiles.fetch(request));
 router.get(`${assetsPath}/*path`, ({ request }) => assets.fetch(request));

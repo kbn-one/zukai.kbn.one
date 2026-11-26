@@ -158,6 +158,21 @@ export const iconPaths = {
     dot(7, 14),
     dot(17, 14),
   ],
+  fingerprint: [
+    "M6.5 5.5A8 8 0 0 1 20 11.5v1",
+    "M4 9.5a8 8 0 0 0-.5 3",
+    "M7.5 19.5A11 11 0 0 0 8 12a4 4 0 0 1 8 0v1.5",
+    "M12 12v2a10 10 0 0 1-1.5 6",
+    "M16 17.5a14 14 0 0 1-.8 3",
+  ],
+  cloud: ["M7 18a5 5 0 0 1-.6-10A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"],
+  qr: [
+    rect(3, 3, 7, 7, 1),
+    rect(14, 3, 7, 7, 1),
+    rect(3, 14, 7, 7, 1),
+    "M14 14h3v3M21 14v.01M14 21h3M20 18v3",
+  ],
+  hook: ["M15 3v9a5 5 0 0 1-10 0v-2", "m3 12 2-2 2 2"],
   restart: ["M3 12a9 9 0 1 0 3-6.7L3 8", "M3 3v5h5"],
 } as const satisfies Record<string, readonly string[]>;
 

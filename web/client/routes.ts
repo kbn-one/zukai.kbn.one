@@ -36,4 +36,14 @@ export const routes = route(base, {
     signature: get("/signature"),
     license: get("/license"),
   }),
+  passkey: route("passkey", {
+    index: get("/"),
+    password: get("/password"),
+    keys: get("/keys"),
+    device: get("/device"),
+    phishing: get("/phishing"),
+    flow: get("/flow"),
+    sync: get("/sync"),
+    myths: get("/myths"),
+  }),
 });
