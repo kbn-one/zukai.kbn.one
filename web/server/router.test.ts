@@ -29,6 +29,16 @@ Deno.test("GET /ai shows the overview and links every chapter", async () => {
   }
 });
 
+Deno.test("GET /passkey shows the overview and links every chapter", async () => {
+  const html = await get("/passkey");
+  assertStringIncludes(html, "全体図");
+  assertStringIncludes(html, 'property="og:image"');
+  const passkey = series.find((s) => s.key === "passkey")!;
+  for (const c of passkey.chapters) {
+    assertStringIncludes(html, `href="${c.route.href()}"`);
+  }
+});
+
 Deno.test("GET /myna shows the card and links every chapter", async () => {
   const html = await get("/myna");
   assertStringIncludes(html, "<ruby>");

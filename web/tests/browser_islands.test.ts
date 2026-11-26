@@ -377,3 +377,78 @@ Deno.test({
     });
   },
 });
+
+Deno.test({
+  ...options,
+  name:
+    "lightpanda: /passkey/password でサイトの記録がもれても、公開鍵ではログインできない",
+  async fn() {
+    await withPage(async (page, origin) => {
+      await open(page, `${origin}/passkey/password`);
+      await clickButton(page, "サイトから記録がもれたら");
+      await page.waitForFunction(
+        shows(["この合言葉で、あなたとしてログインできてしまう"]),
+        { timeout: 5_000 },
+      );
+      await clickButton(page, "パスキー");
+      await clickButton(page, "サイトから記録がもれたら");
+      await page.waitForFunction(
+        shows(["公開鍵ではしるしを作れない"]),
+        { timeout: 5_000 },
+      );
+    });
+  },
+});
+
+Deno.test({
+  ...options,
+  name: "lightpanda: /passkey/keys で、問題を変えると前のしるしは合わない",
+  async fn() {
+    await withPage(async (page, origin) => {
+      await open(page, `${origin}/passkey/keys`);
+      await clickButton(page, "秘密鍵でしるしをつける");
+      await clickButton(page, "公開鍵で確かめる");
+      await page.waitForFunction(shows(["ペアの鍵のしるし。OK"]), {
+        timeout: 5_000,
+      });
+      await clickButton(page, "新しい問題にする");
+      await clickButton(page, "公開鍵で確かめる");
+      await page.waitForFunction(shows(["前の問題につけたしるし"]), {
+        timeout: 5_000,
+      });
+    });
+  },
+});
+
+Deno.test({
+  ...options,
+  name: "lightpanda: /passkey/phishing のにせサイトでは、パスキーが出てこない",
+  async fn() {
+    await withPage(async (page, origin) => {
+      await open(page, `${origin}/passkey/phishing`);
+      await clickButton(page, "パスキー × にせ");
+      await page.waitForFunction(
+        shows(["examp1e-bank.jp 用は、ない", "盗めるものがない"]),
+        { timeout: 5_000 },
+      );
+    });
+  },
+});
+
+Deno.test({
+  ...options,
+  name: "lightpanda: /passkey/sync で iPhone をなくしても Mac に残る",
+  async fn() {
+    await withPage(async (page, origin) => {
+      await open(page, `${origin}/passkey/sync`);
+      await clickButton(page, "iPhoneをなくす");
+      await page.waitForFunction(shows(["Macにはパスキーが残っている"]), {
+        timeout: 5_000,
+      });
+      await clickButton(page, "新しい iPhoneを用意する");
+      await page.waitForFunction(shows(["パスキー（同期でもどった）"]), {
+        timeout: 5_000,
+      });
+    });
+  },
+});

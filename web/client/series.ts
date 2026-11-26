@@ -39,7 +39,7 @@ export interface Series {
   chapters: readonly Chapter[];
 }
 
-export type SeriesKey = "ai" | "myna";
+export type SeriesKey = "ai" | "myna" | "passkey";
 
 export const series: readonly Series[] = [
   {
@@ -172,6 +172,72 @@ export const series: readonly Series[] = [
         lead:
           "今は、カードを持っていないと運転できない。国は、スマホだけで運転できるようにする道を考えているよ。",
         icon: "car",
+      },
+    ],
+  },
+  {
+    key: "passkey",
+    title: "図解パスキー",
+    lead:
+      "パスワードのかわりに、指紋や顔、画面ロックでログインする「パスキー」。何がサイトに届いて、何が手元に残るの？ にせサイトに強いのはなぜ？ スマホをなくしたら？",
+    icon: "key",
+    index: routes.passkey.index,
+    chapters: [
+      {
+        route: routes.passkey.password,
+        short: "パスワードとのちがい",
+        title: "パスワードと、何がちがう？",
+        lead:
+          "パスワードは、あなたとサイトが同じ合言葉を知っています。パスキーでは、サイトはログインに使える秘密を持っていません。",
+        icon: "lock",
+      },
+      {
+        route: routes.passkey.keys,
+        short: "2つの鍵",
+        title: "秘密鍵と公開鍵は、はんこと印影の関係",
+        lead:
+          "パスキーの正体は、ペアになった2つの鍵。片方でしか作れない「しるし」を、もう片方で確かめます。",
+        icon: "publicKey",
+      },
+      {
+        route: routes.passkey.device,
+        short: "端末から出ない",
+        title: "秘密鍵も指紋も、端末の外へは出ていかない",
+        lead:
+          "ログインのとき、ネットを流れるのは「問題」と「しるし」だけ。指紋や顔は、端末のロックを開けるのに使われるだけです。",
+        icon: "fingerprint",
+      },
+      {
+        route: routes.passkey.phishing,
+        short: "にせサイトに強い",
+        title: "にせサイトでは、パスキーは使えない",
+        lead:
+          "パスキーは、作ったサイトのドメインに結びついています。見た目がそっくりでも、ドメインがちがえば鍵は出てきません。",
+        icon: "hook",
+      },
+      {
+        route: routes.passkey.flow,
+        short: "登録とログイン",
+        title: "登録とログインは、こう流れる",
+        lead:
+          "登録ではサイトごとに新しい鍵のペアを作り、公開鍵だけをわたします。ログインでは毎回ちがう問題に、しるしをつけて返します。",
+        icon: "arrowRight",
+      },
+      {
+        route: routes.passkey.sync,
+        short: "なくしたら・同期",
+        title: "スマホをなくしたら、パスキーはどうなる？",
+        lead:
+          "iCloud キーチェーンや Google パスワードマネージャーは、パスキーを暗号化したまま、あなたの端末どうしで同期します。",
+        icon: "cloud",
+      },
+      {
+        route: routes.passkey.myths,
+        short: "よくある誤解",
+        title: "パスキーの、よくある誤解",
+        lead:
+          "「指紋がサイトに送られる」「スマホをなくしたらおしまい」「パスキーなら何があっても安全」……本当はどうなのか、ひとつずつ見ていきます。",
+        icon: "question",
       },
     ],
   },
